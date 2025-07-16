@@ -39,16 +39,29 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'E-mail e senha são obrigatórios.' });
-    }
+
+    console.log('\n--- NOVA TENTATIVA DE LOGIN ---');
+    console.log('E-mail recebido do frontend:', email);
+    console.log('Senha recebida do frontend:', `"${password}"`); // Aspas para ver espaços
+
     const user = await prisma.collaborator.findUnique({ where: { email } });
     if (!user) {
+      console.log('Resultado: Usuário não encontrado no banco de dados.');
       return res.status(401).json({ error: 'Credenciais inválidas.' });
     }
+
+    console.log('Usuário encontrado:', user.name);
+
     const [salt, storedHash] = user.password.split(':');
+    console.log('Hash salvo no banco:', storedHash);
+
     const providedPasswordHash = crypto.scryptSync(password, salt, 64).toString('hex');
+    console.log('Hash da senha digitada:', providedPasswordHash);
+
     const hashesMatch = crypto.timingSafeEqual(Buffer.from(storedHash), Buffer.from(providedPasswordHash));
+
+    console.log('Resultado da comparação:', hashesMatch ? 'SENHAS BATEM' : 'SENHAS NÃO BATEM');
+
     if (hashesMatch) {
       const { password: _, ...userWithoutPassword } = user;
       res.status(200).json({ message: 'Login bem-sucedido!', user: userWithoutPassword });
@@ -60,7 +73,6 @@ app.post('/api/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Erro interno ao tentar fazer login.' });
   }
 });
-
 app.get('/api/collaborators', async (req, res) => {
   try {
     const collaborators = await prisma.collaborator.findMany({

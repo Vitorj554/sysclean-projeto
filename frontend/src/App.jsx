@@ -8,6 +8,8 @@ import CollaboratorManager from './CollaboratorManager';
 import LoadingSpinner from './LoadingSpinner';
 import './App.css';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [collaborators, setCollaborators] = useState([]);
@@ -26,8 +28,8 @@ function App() {
     setIsLoading(true);
     try {
       const [collabResponse, scheduleResponse] = await Promise.all([
-        axios.get('http://localhost:3001/api/collaborators'),
-        axios.get('http://localhost:3001/api/schedule'),
+        axios.get(`${API_URL}/api/collaborators`),
+        axios.get(`${API_URL}/api/schedule`),
       ]);
       setCollaborators(collabResponse.data);
       setSchedule({
@@ -46,19 +48,20 @@ function App() {
     fetchData();
   }, [currentUser]);
 
- const handleAddCollaborator = async (name, email, password) => { 
-  if (!name.trim() || !email.trim() || !password.trim()) {
-    toast.error('Por favor, preencha nome, e-mail e senha inicial.');
-    return;
-  }
-  try {
-    await axios.post('http://localhost:3001/api/auth/register', { name, email, password });
-    toast.success('Colaborador adicionado com sucesso!');
-    fetchData(); 
-  } catch (err) {
-    toast.error('Falha ao criar colaborador. Verifique se o e-mail já existe.');
-  }
-};
+  const handleAddCollaborator = async (name, email, password) => {
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      toast.error('Por favor, preencha nome, e-mail e senha inicial.');
+      return;
+    }
+    try {
+      await axios.post(`${API_URL}/api/auth/register`, { name, email, password });
+      toast.success('Colaborador adicionado com sucesso!');
+      fetchData();
+    } catch (err) {
+      toast.error('Falha ao criar colaborador. Verifique se o e-mail já existe.');
+    }
+  };
+
   const handleDeleteCollaborator = (collaborator) => {
     setDeletingCollaborator(collaborator);
   };
@@ -66,7 +69,7 @@ function App() {
   const confirmDeleteCollaborator = async () => {
     if (!deletingCollaborator) return;
     try {
-      await axios.delete(`http://localhost:3001/api/collaborators/${deletingCollaborator.id}`);
+      await axios.delete(`${API_URL}/api/collaborators/${deletingCollaborator.id}`);
       toast.success(`Colaborador '${deletingCollaborator.name}' removido com sucesso!`);
       setDeletingCollaborator(null);
       fetchData();
@@ -78,7 +81,7 @@ function App() {
 
   const handleSaveEdit = async (scheduleId, newCollaboratorId) => {
     try {
-      await axios.put(`http://localhost:3001/api/schedule/${scheduleId}`, { newCollaboratorId });
+      await axios.put(`${API_URL}/api/schedule/${scheduleId}`, { newCollaboratorId });
       toast.success('Agendamento atualizado com sucesso!');
       setEditingSchedule(null);
       fetchData();

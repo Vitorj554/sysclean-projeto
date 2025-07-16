@@ -1,8 +1,8 @@
-// frontend/src/LoginPage.jsx
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function LoginPage({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ function LoginPage({ onLoginSuccess }) {
       return toast.error('Por favor, preencha e-mail e senha.');
     }
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password,
       });
