@@ -1,0 +1,26 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Collaborator {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String   
+  role      String   @default("COLLABORATOR") 
+  createdAt DateTime @default(now())
+  schedules Schedule[]
+}
+
+model Schedule {
+  id             Int          @id @default(autoincrement())
+  date           DateTime
+  collaborator   Collaborator @relation(fields: [collaboratorId], references: [id])
+  collaboratorId Int
+  googleEventId  String?
+}
